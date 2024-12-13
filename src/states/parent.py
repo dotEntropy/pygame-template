@@ -1,6 +1,6 @@
 import pygame
 from src.variables import GameVars
-from utils.colored_print import print_error, print_success
+from utils.console import print_error, print_success
 
 
 class State:

@@ -3,7 +3,7 @@ import pathlib
 import os
 from src.variables import GameVars
 from src.constants import *
-from utils.colored_print import print_success
+from utils.console import print_success
 
 
 class AssetLoader:
@@ -11,7 +11,6 @@ class AssetLoader:
         self.ASSET_DIR = pathlib.Path(__file__).parent.parent / 'assets' 
         self.gfx_cache = {}
         self.sfx_cache = {}
-        self.font_cache = {}
         self.load_assets('gfx', ('png', 'jpg'), self.load_image)
         self.load_assets('sfx', ('mp3', 'wav', 'ogg'), pygame.mixer.Sound)
         print_success(f'GFX Loaded: {self.gfx_cache}')
@@ -36,6 +35,7 @@ class AssetLoader:
     def load_image(path: str) -> pygame.Surface:
         image = pygame.image.load(path).convert_alpha()
         return image
+
 
 pygame.init()
 pygame.display.set_mode([DEFAULT_WIDTH, DEFAULT_HEIGHT])

@@ -6,7 +6,7 @@ import importlib
 from pygame.event import Event
 from src.variables import GameVars
 from src.states.parent import State
-from utils.colored_print import print_error
+from utils.console import print_error
 
 
 class StateRunner:
