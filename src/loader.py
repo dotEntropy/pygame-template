@@ -14,10 +14,8 @@ class AssetLoader:
         self.font_cache = {}
         self.load_assets('gfx', ('png', 'jpg'), self.load_image)
         self.load_assets('sfx', ('mp3', 'wav', 'ogg'), pygame.mixer.Sound)
-        self.load_assets('fonts', ('ttf',), pygame.font.Font)
         print_success(f'GFX Loaded: {self.gfx_cache}')
         print_success(f'SFX Loaded: {self.sfx_cache}')
-        print_success(f'Fonts Loaded: {self.font_cache}')
 
     def load_assets(self, folder_name: str, ext_names: tuple[str], loader: object) -> None:
         for file in os.listdir(self.ASSET_DIR / folder_name):
@@ -27,9 +25,6 @@ class AssetLoader:
                 self.gfx_cache.update(asset)
             if folder_name == "sfx":
                 self.sfx_cache.update(asset)
-            if folder_name == "fonts":
-                self.font_cache.update(asset)
-
 
     def verify_ext(self, file: str, ext_names: tuple[str]) -> str:
         for ext_name in ext_names:
@@ -62,7 +57,6 @@ def get_sfx(asset_id: str) -> pygame.mixer.Sound:
     return sfx
 
 
-def get_font(asset_id: str) -> pygame.font.Font:
-    cache = asset.font_cache
-    font = cache.get(asset_id, cache['default'])
+def get_font(asset_id: str, size: int=20) -> pygame.font.Font:
+    font = pygame.font.Font(asset.ASSET_DIR / 'fonts' / f'{asset_id}.ttf', size)
     return font
