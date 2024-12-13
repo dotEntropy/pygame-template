@@ -12,19 +12,16 @@ from utils.colored_print import print_error
 class StateRunner:
     def __init__(self) -> None:
         self._load_states()
-        GameVars.active_state = GameVars.states.get('default')
-        if GameVars.active_state is None:
-            print(f'States: {GameVars.states}')
-            exit()
+        self._load_default_state()
     
     def _load_states(self) -> None:
         STATE_DIR = pathlib.Path(__file__).parent / 'states'
         for state in os.listdir(STATE_DIR):
-            if not state.endswith('.py') or state == 'parent.py':
-                continue
             self._load_state(state)
     
     def _load_state(self, state: str) -> None:
+        if not state.endswith('.py') or state == 'parent.py':
+            return
         try:
             state = state.removesuffix('.py')
             module = importlib.import_module(f'src.states.{state}')
@@ -35,6 +32,12 @@ class StateRunner:
                 print_error(f'State "{state}" must have a setup function!')
         except ImportError as e:
             print_error(f'State "{state}" setup failed: {e}')
+
+    def _load_default_state(self) -> None:
+        GameVars.active_state = GameVars.states.get('default')
+        if GameVars.active_state is None:
+            print_error('There is no "default" state!\nTerminating...')
+            exit()
 
     def run(self, dt: float) -> None:
         self.active_state: State = GameVars.active_state

@@ -11,19 +11,16 @@ class DefaultState(State):
         self.pos = Vector2()
     
     def update(self, dt: float) -> None:
-        if self.pos.x == 0:
-            print(self.pos)
         self.pos.x += 100 * dt
     
     def draw(self) -> None:
-        self.SCREEN.fill((0,0,0))
+        self.SCREEN.fill((50,50,50))
         self.SCREEN.blit(get_gfx('ligma'), self.pos)
     
     def handle_key_tap(self, key: int) -> None:
         if key == pygame.K_e:
             self.switch_state('state0')
-            print(GameVars.states)
-        if key == pygame.K_SPACE:
+        if key == pygame.K_w:
             self.reset_state('default')
     
     def handle_key_held(self, keys):
@@ -31,4 +28,5 @@ class DefaultState(State):
 
 
 def setup() -> None:
-    DefaultState()
+    state = DefaultState()
+    print(state)
