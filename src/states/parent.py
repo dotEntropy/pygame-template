@@ -29,25 +29,25 @@ class State:
             print_error(f'State "{alias}" not found. Cannot reset.')
     
     def _init_sprites(self) -> None:
-        pass
+        ...
     
     def _init_groups(self) -> None:
-        pass
+        ...
     
     def update(self, dt: float) -> None:
-        pass
+        ...
 
     def draw(self) -> None:
-        pass
+        ...
     
     def handle_key_tap(self, key: int) -> None:
-        pass
+        ...
 
     def handle_key_held(self, keys: dict) -> None:
-        pass
+        ...
 
     def handle_mouse_tap(self, button: int) -> None:
-        pass
+        ...
 
     def handle_mouse_held(self, buttons: tuple) -> None:
-        pass
+        ...

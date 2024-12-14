@@ -28,6 +28,7 @@ class DefaultState(State):
             self.switch_state('state0')
         if key == pygame.K_w:
             self.reset_state('default')
+        self.sakuya.key_tap(key)
     
     def handle_key_held(self, keys):
         pass

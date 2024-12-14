@@ -66,7 +66,10 @@ def get_gfx(asset_id: str) -> pygame.Surface:
 
 def get_frames(asset_id: str) -> dict[str: pygame.Surface]:
     cache = asset.frames_cache
-    frames = cache.get(asset_id, cache['default'])
+    if asset_id not in cache:
+        asset_id = 'default'
+    frames = cache.get(asset_id)
+    frames.update({'asset_id': asset_id})
     return frames
 
 
