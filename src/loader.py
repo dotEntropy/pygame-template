@@ -17,7 +17,7 @@ class AssetLoader:
         self.load_assets('sfx', ('mp3', 'wav', 'ogg'), pygame.mixer.Sound)
         print_success(f'GFX Loaded: {list(self.gfx_cache.keys())}')
         print_success(f'Frames Loaded: {list(self.frames_cache.keys())}')
-        print_success(f'SFX Loaded: {list(self.sfx_cache.keys())}\n')
+        print_success(f'SFX Loaded: {list(self.sfx_cache.keys())}')
 
     def load_assets(self, folder_name: str, ext_names: tuple[str], loader: object) -> None:
         for file in os.listdir(self.ASSET_DIR / folder_name):

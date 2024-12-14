@@ -5,7 +5,7 @@ class GameVars:
     # display
     client_w = None
     client_h = None
-    fps = 240
+    fps = 0
     sprite_scale = 1
 
     # states
