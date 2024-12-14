@@ -22,16 +22,13 @@ class StateRunner:
     def _load_state(self, state: str) -> None:
         if not state.endswith('.py') or state == 'parent.py':
             return
-        try:
-            state = state.removesuffix('.py')
-            module = importlib.import_module(f'src.states.{state}')
-            setup_func = getattr(module, 'setup', None)
-            if callable(setup_func):
-                setup_func()
-            else:
-                print_error(f'State "{state}" must have a setup function!')
-        except ImportError as e:
-            print_error(f'State "{state}" setup failed: {e}')
+        state = state.removesuffix('.py')
+        module = importlib.import_module(f'src.states.{state}')
+        setup_func = getattr(module, 'setup', None)
+        if callable(setup_func):
+            setup_func()
+        else:
+            print_error(f'State "{state}" must have a setup function!')
 
     def _load_default_state(self) -> None:
         GameVars.active_state = GameVars.states.get('default')

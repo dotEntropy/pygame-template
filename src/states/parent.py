@@ -9,8 +9,8 @@ class State:
         is_reloaded = self.alias in GameVars.states
         GameVars.states[self.alias] = self
         self.SCREEN = pygame.display.get_surface()
-        self._init_sprites()
         self._init_groups()
+        self._init_sprites()
         load_str = 'reloaded' if is_reloaded else 'loaded'
         print_success(f'The state "{self.alias}" is {load_str}!')
 
