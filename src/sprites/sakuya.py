@@ -1,5 +1,4 @@
 import pygame
-import json
 from pygame.sprite import Sprite
 from pygame.math import Vector2
 from src.sprites.parents import Animation
@@ -9,11 +8,11 @@ from src.variables import GameVars
 class Sakuya(Sprite, Animation):
     def __init__(self):
         super().__init__()
-        Animation.__init__(self, config_id='default', asset_id='sakuya', fps=8)
+        Animation.__init__(self, config_id='sakuya', asset_id='sakuya', fps=12)
         self._create_config(
             config_id='sakuya-attack', 
             asset_id='sakuya-attack', 
-            fps=10, 
+            fps=16,
             loop=False
             )
     
@@ -23,7 +22,8 @@ class Sakuya(Sprite, Animation):
     
     def _handle_keyframes(self):
         if self.config_id == 'sakuya-attack' and self.current_frame_idx == 0:
-            self._print_current_config()
+            pass
+            # self._print_current_config()
     
     def key_tap(self, key: int) -> None:
         if key == pygame.K_SPACE:
@@ -32,8 +32,8 @@ class Sakuya(Sprite, Animation):
             self.pos.x = GameVars.get_center_pos().x-550
 
     def update(self, dt: float):
-        if self.config_id == 'default':
+        if self.config_id == 'sakuya':
             self.pos.x += 110 * dt * self.fps / 10
-            self.fps += 1 * dt
-            self.configs['default']['fps'] = self.fps
+            self.fps += 4 * dt
+            self.configs['sakuya']['fps'] = self.fps
         self._update_frame(dt)

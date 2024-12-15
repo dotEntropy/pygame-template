@@ -8,7 +8,7 @@ from src.loader import get_gfx
 class Game:
     def __init__(self) -> None:
         pygame.display.set_caption('Game')
-        pygame.display.set_icon(get_gfx('icon'))
+        pygame.display.set_icon(get_gfx('default'))
         self.state_runner = StateRunner()
         self.pre_time = time.time()
         self.clock = pygame.time.Clock()

@@ -3,6 +3,7 @@ from src.states.parent import State
 from utils.text import Text
 from src.variables import GameVars
 from src.sprites.sakuya import Sakuya
+from src.sprites.button import Button
 
 
 class DefaultState(State):
@@ -14,6 +15,15 @@ class DefaultState(State):
 
     def _init_sprites(self):
         self.sakuya = Sakuya()
+        # self.button = Button(
+        #     print('Pressed!'), 
+        #     GameVars.get_center_pos(), 
+        #     'sakuya', 
+        #     is_toggle=False, 
+        #     is_animated=True, 
+        #     config_id='button',
+        #     fps=10
+        #     )
         self.group.add(self.sakuya)
     
     def update(self, dt: float) -> None:
@@ -28,10 +38,22 @@ class DefaultState(State):
             self.switch_state('state0')
         if key == pygame.K_w:
             self.reset_state('default')
-        self.sakuya.key_tap(key)
+        
+        for sprites in self.group.sprites():
+            sprites.key_tap(key)
+
+    def handle_key_held(self, keys: pygame.key.ScancodeWrapper) -> None:
+        for sprites in self.group.sprites():
+            sprites.key_held(keys)
     
-    def handle_key_held(self, keys):
-        pass
+    def handle_mouse_tap(self, button: int) -> None:
+        for sprites in self.group.sprites():
+            sprites.mouse_tap(button)
+
+    def handle_mouse_held(self, buttons: tuple[int]) -> None:
+        for sprites in self.group.sprites():
+            sprites.mouse_held(buttons)
+    
 
 
 def setup() -> None:

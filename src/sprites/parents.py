@@ -1,7 +1,7 @@
 import pygame
 import json
 from pygame.math import Vector2
-from src.loader import get_frames
+from src.loader import get_gfx
 from src.variables import GameVars
 
 
@@ -35,12 +35,13 @@ class Animation(Graphics):
         self._switch_config(config_id)
     
     def _create_config(self, config_id: str, asset_id: str, fps: int, reset_idx: bool=True, loop: bool=True) -> None:
-        frames = get_frames(asset_id)
+        if not config_id:
+            config_id = 'null'
+        frames = get_gfx(asset_id, is_animation=True)
         asset_id = frames['asset_id']
         self.configs.update({
             config_id: {
             'frames': frames,
-            'total_frames': len(frames) - 1,
             'fps': fps,
             'reset_idx': reset_idx,
             'loop': loop
@@ -49,13 +50,14 @@ class Animation(Graphics):
     
     def _switch_config(self, config_id: str, is_fallback: bool=False) -> None:
         if config_id not in self.configs:
-            print(f'Config ID "{config_id}" does not exist!')
-            return
+            print(f'Config ID "{config_id}" does not exist! Setting it to "null"...')
+            config_id = 'null'
+
         self.config_id = config_id
         self.current_config = self.configs[config_id] 
-        self.asset_id = self.current_config['frames']['asset_id']
         self.frames = self.current_config['frames']
-        self.total_frames = self.current_config['total_frames']
+        self.asset_id = self.current_config['frames']['asset_id']
+        self.total_frames = self.current_config['frames']['total_frames']
         self.fps = self.current_config['fps']
         self.reset_idx = self.current_config['reset_idx']
         self.loop = self.current_config['loop']
@@ -71,9 +73,13 @@ class Animation(Graphics):
         
         if not is_fallback:
             self._handle_keyframes()
+
         self._set_image()
     
     def _update_frame(self, dt: float) -> None:
+        if self.total_frames == 1:
+            self._set_image()
+            return
         self._update_frame_idx(dt)
         if self.current_frame_idx != self.pre_frame_idx:
             self.pre_frame_idx = self.int_frame_idx
@@ -113,3 +119,15 @@ class Animation(Graphics):
             cfg['frames'].update({key: value})
         
         print(json.dumps(cfg, sort_keys=True, indent=4))
+
+    def key_tap(self, key: int) -> None:
+        ...
+    
+    def mouse_tap(self, button: int) -> None:
+        ...
+
+    def mouse_held(self, buttons: tuple[int]) -> None:
+        ...
+    
+    def key_held(self, keys: pygame.key.ScancodeWrapper) -> None:
+        ...
