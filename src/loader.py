@@ -1,9 +1,9 @@
 import pygame
 import pathlib
 import os
+import colorama
 from src.variables import GameVars
 from src.constants import *
-from utils.console import print_success
 
 
 class AssetLoader:
@@ -13,8 +13,8 @@ class AssetLoader:
         self.sfx_cache = {}
         self.load_assets('gfx', ('png', 'jpg'), self.load_image)
         self.load_assets('sfx', ('mp3', 'wav', 'ogg'), pygame.mixer.Sound)
-        print_success(f'Frames Loaded: {list(self.gfx_cache.keys())}')
-        print_success(f'SFX Loaded: {list(self.sfx_cache.keys())}')
+        (f'{colorama.Fore.GREEN}Frames Loaded: {list(self.gfx_cache.keys())}')
+        (f'{colorama.Fore.GREEN}SFX Loaded: {list(self.sfx_cache.keys())}')
 
     def load_assets(self, folder_name: str, ext_names: tuple[str], loader: object) -> None:
         for file in os.listdir(self.ASSET_DIR / folder_name):

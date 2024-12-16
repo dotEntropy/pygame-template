@@ -3,10 +3,10 @@ import sys
 import os
 import pathlib
 import importlib
+import colorama
 from pygame.event import Event
 from src.variables import GameVars
 from src.states.parent import State
-from utils.console import print_error
 
 
 class StateRunner:
@@ -28,19 +28,19 @@ class StateRunner:
         if callable(setup_func):
             setup_func()
         else:
-            print_error(f'State "{state}" must have a setup function!')
+            print(f'{colorama.Fore.RED}State "{state}" must have a setup function!')
 
     def _load_default_state(self) -> None:
         GameVars.active_state = GameVars.states.get('default')
         if GameVars.active_state is None:
-            print_error('There is no "default" state!\nTerminating...')
+            print(f'{colorama.Fore.RED}There is no "default" state!\nTerminating...')
             exit()
 
     def run(self, dt: float) -> None:
         self.active_state: State = GameVars.active_state
+        self._handle_events()
         self.active_state.update(dt)
         self.active_state.draw()
-        self._handle_events()
 
     def _handle_events(self) -> None:
         for event in pygame.event.get():

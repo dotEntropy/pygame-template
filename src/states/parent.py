@@ -1,6 +1,6 @@
 import pygame
+import colorama
 from src.variables import GameVars
-from utils.console import print_error, print_success
 
 
 class State:
@@ -12,12 +12,12 @@ class State:
         self._init_groups()
         self._init_sprites()
         load_str = 'reloaded!' if is_reloaded else 'loaded!'
-        print_success(f'The state "{self.alias}" is {load_str}')
+        print(f'{colorama.Fore.GREEN}The state "{self.alias}" is {load_str}')
 
     def switch_state(self, alias: str) -> None:
         state = GameVars.states.get(alias)
         if state is None:
-            print_error(f'State "{alias}" not found. Cannot switch.')
+            print(f'{colorama.Fore.RED}State "{alias}" not found. Cannot switch.')
         else:
             GameVars.active_state = state 
     
@@ -26,28 +26,14 @@ class State:
         if state:
             state.__init__()
         else:
-            print_error(f'State "{alias}" not found. Cannot reset.')
+            print(f'{colorama.Fore.RED}State "{alias}" not found. Cannot reset.')
     
-    def _init_sprites(self) -> None:
-        ...
-    
-    def _init_groups(self) -> None:
-        ...
-    
-    def update(self, dt: float) -> None:
-        ...
-
-    def draw(self) -> None:
-        ...
-    
-    def handle_key_tap(self, key: int) -> None:
-        ...
-
-    def handle_key_held(self, keys: dict) -> None:
-        ...
-
-    def handle_mouse_tap(self, button: int) -> None:
-        ...
-
-    def handle_mouse_held(self, buttons: tuple) -> None:
-        ...
+    def _init_sprites(self) -> None: ...
+    def _init_groups(self) -> None: ...
+    def update(self, dt: float) -> None: ...
+    def draw(self) -> None: ...
+    def handle_key_tap(self, key: int) -> None: ...
+    def handle_key_held(self, keys: dict) -> None: ...
+    def handle_mouse_tap(self, button: int) -> None: ...
+    def handle_mouse_held(self, buttons: tuple) -> None: ...
+ 
