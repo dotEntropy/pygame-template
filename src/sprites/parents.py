@@ -1,5 +1,6 @@
 import pygame
 import json
+import colorama
 from pygame.math import Vector2
 from src.loader import get_gfx
 from src.variables import GameVars
@@ -26,13 +27,27 @@ class Graphics:
         self.mask = pygame.mask.from_surface(self.image)
 
 
-class Animation(Graphics):
-    def __init__(self, config_id: str, asset_id: str, fps: int) -> None:
+class Controls:
+    def key_tap(self, key: int) -> None: ...
+    def mouse_tap(self, button: int) -> None: ...
+    def mouse_held(self, buttons: tuple[int]) -> None: ...
+    def key_held(self, keys: pygame.key.ScancodeWrapper) -> None: ...
+
+
+class Animation(Graphics, Controls):
+    def __init__(self, config_id: str, asset_id: str, fps: int, reset_idx: bool=True) -> None:
         Graphics.__init__(self)
+        self._reset_frame_idx()
         self.configs = {}
         self.config_id_fallback = config_id
-        self._create_config(config_id, asset_id, fps)
-        self._switch_config(config_id)
+        self._create_config(config_id, asset_id, fps, reset_idx)
+        self._switch_config(config_id, is_fallback=True)
+    
+    def _reset_frame_idx(self) -> None:
+        self.float_frame_idx = 0
+        self.int_frame_idx = 0
+        self.pre_frame_idx = 0
+        self.current_frame_idx = 0
     
     def _create_config(self, config_id: str, asset_id: str, fps: int, reset_idx: bool=True, loop: bool=True) -> None:
         if not config_id:
@@ -50,8 +65,8 @@ class Animation(Graphics):
     
     def _switch_config(self, config_id: str, is_fallback: bool=False) -> None:
         if config_id not in self.configs:
-            print(f'Config ID "{config_id}" does not exist! Setting it to "null"...')
-            config_id = 'null'
+            print(f'{colorama.Fore.RED}Failed to apply config.\nConfig ID: "{config_id}" not found!')
+            return
 
         self.config_id = config_id
         self.current_config = self.configs[config_id] 
@@ -63,10 +78,7 @@ class Animation(Graphics):
         self.loop = self.current_config['loop']
 
         if self.reset_idx:
-            self.float_frame_idx = 0
-            self.int_frame_idx = 0
-            self.pre_frame_idx = 0
-            self.current_frame_idx = 0
+            self._reset_frame_idx()
 
         if self.loop:
             self.config_id_fallback = config_id
@@ -97,8 +109,7 @@ class Animation(Graphics):
         if not self.loop and self.current_frame_idx % self.total_frames == 0:
             self._switch_config(self.config_id_fallback, is_fallback=True)
         
-    def _handle_keyframes(self) -> None:
-        ...
+    def _handle_keyframes(self) -> None: ...
     
     def _set_image(self) -> None:
         if image := self.frames.get(f'{self.asset_id}-{self.current_frame_idx}'):
@@ -120,14 +131,3 @@ class Animation(Graphics):
         
         print(json.dumps(cfg, sort_keys=True, indent=4))
 
-    def key_tap(self, key: int) -> None:
-        ...
-    
-    def mouse_tap(self, button: int) -> None:
-        ...
-
-    def mouse_held(self, buttons: tuple[int]) -> None:
-        ...
-    
-    def key_held(self, keys: pygame.key.ScancodeWrapper) -> None:
-        ...

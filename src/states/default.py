@@ -1,4 +1,5 @@
 import pygame
+from pygame.math import Vector2
 from src.states.parent import State
 from utils.text import Text
 from src.variables import GameVars
@@ -15,19 +16,27 @@ class DefaultState(State):
 
     def _init_sprites(self):
         self.sakuya = Sakuya()
-        # self.button = Button(
-        #     print('Pressed!'), 
-        #     GameVars.get_center_pos(), 
-        #     'sakuya', 
-        #     is_toggle=False, 
-        #     is_animated=True, 
-        #     config_id='button',
-        #     fps=10
-        #     )
-        self.group.add(self.sakuya)
+        self.button = Button(
+            self.say,
+            GameVars.get_center_pos(), 
+            is_toggle=False, 
+            released_animation={
+                'asset_id': 'sakuya',
+                'fps': 14
+                },
+            pressed_animation={
+                'asset_id': 'sakuya-attack',
+                'fps': 14
+                },
+            )
+        self.group.add(self.sakuya, self.button)
+    
+    def say(self) -> None:
+        print('ligma')
     
     def update(self, dt: float) -> None:
-        self.group.update(dt)
+        mouse_pos = Vector2(pygame.mouse.get_pos())
+        self.group.update(dt=dt, mouse_pos=mouse_pos)
     
     def draw(self) -> None:
         self.SCREEN.fill((50,50,50))

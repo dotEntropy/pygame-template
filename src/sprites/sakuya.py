@@ -31,9 +31,5 @@ class Sakuya(Sprite, Animation):
         if key == pygame.K_f:
             self.pos.x = GameVars.get_center_pos().x-550
 
-    def update(self, dt: float):
-        if self.config_id == 'sakuya':
-            self.pos.x += 110 * dt * self.fps / 10
-            self.fps += 4 * dt
-            self.configs['sakuya']['fps'] = self.fps
-        self._update_frame(dt)
+    def update(self, *args, **kwargs) -> None:
+        self._update_frame(kwargs['dt'])
