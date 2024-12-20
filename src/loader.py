@@ -8,14 +8,15 @@ from src.constants import *
 
 class AssetLoader:
     def __init__(self) -> None:
+        colorama.init(autoreset=True)
         self.ASSET_DIR = pathlib.Path(__file__).parent.parent / 'assets' 
         self.gfx_cache = {}
         self.sfx_cache = {}
         self.load_assets('dev', ('png', 'jpg'), self.load_image)
         self.load_assets('gfx', ('png', 'jpg'), self.load_image)
         self.load_assets('sfx', ('mp3', 'wav', 'ogg'), pygame.mixer.Sound)
-        (f'{colorama.Fore.GREEN}Frames Loaded: {list(self.gfx_cache.keys())}')
-        (f'{colorama.Fore.GREEN}SFX Loaded: {list(self.sfx_cache.keys())}')
+        print(f'{colorama.Fore.GREEN}Frames Loaded: {list(self.gfx_cache.keys())}')
+        print(f'{colorama.Fore.GREEN}SFX Loaded: {list(self.sfx_cache.keys())}')
 
     def load_assets(self, folder_name: str, ext_names: tuple[str], loader: object) -> None:
         for file in os.listdir(self.ASSET_DIR / folder_name):

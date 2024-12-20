@@ -3,7 +3,7 @@ from pygame.math import Vector2
 from src.states.parent import State
 from utils.text import Text
 from src.variables import GameVars
-from src.sprites.sakuya import TestSprite
+from src.sprites.stock_sprite import StockSprite
 from src.sprites.button import Button
 
 
@@ -12,28 +12,25 @@ class DefaultState(State):
         super().__init__('default')
 
     def _init_sprites(self):
-        self.sakuya = TestSprite()
+        self.stock_sprite = StockSprite()
         self.button = Button(
             self.say,
             GameVars.get_center_pos(), 
             is_toggle=False, 
             released_animation={
                 'asset_id': 'button-release',
-                'fps': 14
                 },
             hovered_animation={
                 'asset_id': 'button-hover',
-                'fps': 14
             },
             pressed_animation={
-                'asset_id': 'button-hover',
-                'fps': 14
+                'asset_id': 'button-press',
                 },
             )
 
     def _init_groups(self):
         self.group = pygame.sprite.Group()
-        self.group.add(self.sakuya, self.button)
+        self.group.add(self.stock_sprite, self.button)
     
     def say(self) -> None:
         print(pygame.mouse.get_pos())

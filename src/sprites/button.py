@@ -14,15 +14,15 @@ class Button(Sprite, Animation):
             is_instant: bool=True,
             is_pressed: bool=False,
             released_animation: dict={
-                'asset_id': 'button-released-default',
+                'asset_id': 'button-released',
                 'fps': 14
                 },
             hovered_animation: dict={
-                'asset_id': 'button-hovered-default',
+                'asset_id': 'button-hovered',
                 'fps': 14
                 },
             pressed_animation: dict={
-                'asset_id': 'button-pressed-default',
+                'asset_id': 'button-pressed',
                 'fps': 14
                 },
             ) -> None:
@@ -48,24 +48,19 @@ class Button(Sprite, Animation):
     
     def _load_animation_configs(self) -> None:
         config_id = 'released'
-        asset_id = self.released_animation['asset_id']
-        fps = self.released_animation['fps']
+        asset_id = self.released_animation.get('asset_id', 'button-released')
+        fps = self.released_animation.get('fps', 14)
         Animation.__init__(self, config_id, asset_id, fps)
 
         config_id = 'hovered'
-        asset_id = self.hovered_animation['asset_id']
-        fps = self.hovered_animation['fps']
-        loops = self.hovered_animation.get('loops', -1)
-        self._create_config(config_id, asset_id, fps, loops=loops)
+        asset_id = self.hovered_animation.get('asset_id', 'button-hovered')
+        fps = self.hovered_animation.get('fps', 14)
+        self._create_config(config_id, asset_id, fps)
 
         config_id = 'pressed'
-        asset_id = self.pressed_animation['asset_id']
-        fps = self.pressed_animation['fps']
-        default_loops = 1 if not self.is_toggle else -1
-        loops = self.pressed_animation.get('loops', default_loops)
-        self._create_config(config_id, asset_id, fps, loops=loops)
-
-        self.mouse_mask = pygame.mask.Mask((1, 1), fill=True)
+        asset_id = self.pressed_animation.get('asset_id', 'button-pressed')
+        fps = self.pressed_animation.get('fps', 14)
+        self._create_config(config_id, asset_id, fps)
     
     def _overrides(self) -> None:
         self.pos = self.origin_pos.copy()
@@ -78,8 +73,7 @@ class Button(Sprite, Animation):
         self._update_frame(kwargs['dt'])
     
     def _handle_presses(self, mouse_pos: Vector2) -> None:
-        offset = mouse_pos - self.rect.topleft
-        self.is_hovered = bool(self.mask.overlap(self.mouse_mask, offset))
+        self.is_hovered = self.rect.collidepoint(*mouse_pos)
 
         self._handle_m1_lock()
         self._handle_m1_release()
@@ -99,7 +93,7 @@ class Button(Sprite, Animation):
         if self.is_m1_held and not self.is_mouse_pos_locked:
             self.is_hovered_on_click = self.is_hovered
             self.is_mouse_pos_locked = True
-        elif not self.is_m1_held:
+        elif not self.is_m1_held or not self.is_hovered:
             self.is_mouse_pos_locked = False
     
     def _handle_m1_release(self) -> None:
@@ -123,27 +117,7 @@ class Button(Sprite, Animation):
             self._switch_config('hovered')
         elif not self.is_hovered and self.config_id not in ('pressed', 'released'):
             self._switch_config('released')
-    
-    def _handle_normal_animation_switch(self) -> None:
-        if self.is_pressed and self.config_id != 'pressed':
-            self._switch_config('pressed')
-        elif self.is_hovered and self.config_id not in ('hovered', 'pressed'):
-            self._switch_config('hovered', is_fallback=True)
-        elif not self.is_hovered and self.config_id not in ('released', 'pressed'):
-            self._switch_config('released')
 
-    def _handle_normal_press(self) -> None:
-        press_conditions = (
-            self.is_hovered_on_click,
-            self.is_m1_released,
-            self.is_hovered
-        )
-        if all(press_conditions) and not self.is_pressed:
-            self.is_activation_pending = True
-            self.is_pressed = True
-        else:
-            self.is_pressed = False
-    
     def _handle_toggle_press(self) -> None:
         press_conditions = (
             self.is_hovered_on_click,
@@ -155,17 +129,34 @@ class Button(Sprite, Animation):
             self.is_pressed = True
         elif all(press_conditions) and self.is_pressed:
             self.is_pressed = False
+    
+    def _handle_normal_animation_switch(self) -> None:
+        if self.is_pressed and self.config_id != 'pressed':
+            self._switch_config('pressed')
+        elif not self.is_pressed and self.is_hovered and self.config_id != 'hovered':
+            self._switch_config('hovered')
+        elif not self.is_pressed and not self.is_hovered and self.config_id != 'released':
+            self._switch_config('released')
+
+    def _handle_normal_press(self) -> None:
+        press_conditions = (
+            self.is_hovered_on_click,
+            self.is_hovered,
+            self.is_m1_held
+        )
+        if all(press_conditions):
+            self.is_pressed = True
+        else:
+            self.is_pressed = False
 
     def _handle_activation(self) -> None:
         activate_conditions = (
             self.is_hovered_on_click,
             self.is_hovered,
             self.is_m1_released,
-            self.is_activation_pending
         )
         if all(activate_conditions):
             self._activate()
-            self.is_activation_pending = False
     
     def _activate(self) -> None:
         if self.is_instant:

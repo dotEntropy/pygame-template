@@ -9,7 +9,7 @@ from src.loader import get_gfx
 class Game:
     def __init__(self) -> None:
         colorama.init(autoreset=True)
-        pygame.display.set_caption('Game')
+        pygame.display.set_caption('Set a caption')
         pygame.display.set_icon(get_gfx('default'))
         self.state_runner = StateRunner()
         self.pre_time = time.time()
