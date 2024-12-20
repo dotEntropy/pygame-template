@@ -5,15 +5,15 @@ from src.sprites.parents import Animation
 from src.variables import GameVars
 
 
-class Sakuya(Sprite, Animation):
+class TestSprite(Sprite, Animation):
     def __init__(self):
         super().__init__()
-        Animation.__init__(self, config_id='sakuya', asset_id='sakuya', fps=12)
+        Animation.__init__(self, config_id='test', asset_id='test', fps=2)
         self._create_config(
-            config_id='sakuya-attack', 
-            asset_id='sakuya-attack', 
-            fps=16,
-            loop=False
+            config_id='alt-test', 
+            asset_id='alt-test', 
+            fps=2,
+            loops=1
             )
     
     def _overrides(self):
@@ -21,13 +21,13 @@ class Sakuya(Sprite, Animation):
         self.scale = 2
     
     def _handle_keyframes(self):
-        if self.config_id == 'sakuya-attack' and self.current_frame_idx == 0:
+        if self.config_id == 'alt-test' and self.current_frame_idx == 0:
             pass
             # self._print_current_config()
     
     def key_tap(self, key: int) -> None:
         if key == pygame.K_SPACE:
-            self._switch_config('sakuya-attack')
+            self._switch_config('alt-test')
         if key == pygame.K_f:
             self.pos.x = GameVars.get_center_pos().x-550
 

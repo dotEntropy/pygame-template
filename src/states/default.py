@@ -3,7 +3,7 @@ from pygame.math import Vector2
 from src.states.parent import State
 from utils.text import Text
 from src.variables import GameVars
-from src.sprites.sakuya import Sakuya
+from src.sprites.sakuya import TestSprite
 from src.sprites.button import Button
 
 
@@ -11,28 +11,32 @@ class DefaultState(State):
     def __init__(self) -> None:
         super().__init__('default')
 
-    def _init_groups(self):
-        self.group = pygame.sprite.Group()
-
     def _init_sprites(self):
-        self.sakuya = Sakuya()
+        self.sakuya = TestSprite()
         self.button = Button(
             self.say,
             GameVars.get_center_pos(), 
             is_toggle=False, 
             released_animation={
-                'asset_id': 'sakuya',
+                'asset_id': 'button-release',
                 'fps': 14
                 },
+            hovered_animation={
+                'asset_id': 'button-hover',
+                'fps': 14
+            },
             pressed_animation={
-                'asset_id': 'sakuya-attack',
+                'asset_id': 'button-hover',
                 'fps': 14
                 },
             )
+
+    def _init_groups(self):
+        self.group = pygame.sprite.Group()
         self.group.add(self.sakuya, self.button)
     
     def say(self) -> None:
-        print('ligma')
+        print(pygame.mouse.get_pos())
     
     def update(self, dt: float) -> None:
         mouse_pos = Vector2(pygame.mouse.get_pos())
@@ -62,7 +66,6 @@ class DefaultState(State):
     def handle_mouse_held(self, buttons: tuple[int]) -> None:
         for sprites in self.group.sprites():
             sprites.mouse_held(buttons)
-    
 
 
 def setup() -> None:

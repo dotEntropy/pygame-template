@@ -11,6 +11,7 @@ class AssetLoader:
         self.ASSET_DIR = pathlib.Path(__file__).parent.parent / 'assets' 
         self.gfx_cache = {}
         self.sfx_cache = {}
+        self.load_assets('dev', ('png', 'jpg'), self.load_image)
         self.load_assets('gfx', ('png', 'jpg'), self.load_image)
         self.load_assets('sfx', ('mp3', 'wav', 'ogg'), pygame.mixer.Sound)
         (f'{colorama.Fore.GREEN}Frames Loaded: {list(self.gfx_cache.keys())}')
@@ -20,7 +21,7 @@ class AssetLoader:
         for file in os.listdir(self.ASSET_DIR / folder_name):
             name = self.strip_ext(file, ext_names)
             asset = loader(self.ASSET_DIR / folder_name / file)
-            if folder_name == 'gfx':
+            if folder_name in ('gfx', 'dev'):
                 self.load_frames(name, asset)
             if folder_name == 'sfx':
                 self.sfx_cache.update({name: asset})

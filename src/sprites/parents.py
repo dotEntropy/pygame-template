@@ -49,7 +49,7 @@ class Animation(Graphics, Controls):
         self.pre_frame_idx = 0
         self.current_frame_idx = 0
     
-    def _create_config(self, config_id: str, asset_id: str, fps: int, reset_idx: bool=True, loop: bool=True) -> None:
+    def _create_config(self, config_id: str, asset_id: str, fps: int, reset_idx: bool=True, loops: int=-1) -> None:
         if not config_id:
             config_id = 'null'
         frames = get_gfx(asset_id, is_animation=True)
@@ -59,7 +59,7 @@ class Animation(Graphics, Controls):
             'frames': frames,
             'fps': fps,
             'reset_idx': reset_idx,
-            'loop': loop
+            'loops': loops
             }
         })
     
@@ -67,6 +67,8 @@ class Animation(Graphics, Controls):
         if config_id not in self.configs:
             print(f'{colorama.Fore.RED}Failed to apply config.\nConfig ID: "{config_id}" not found!')
             return
+        else:
+            print(f'Switching to {config_id} config')
 
         self.config_id = config_id
         self.current_config = self.configs[config_id] 
@@ -75,41 +77,52 @@ class Animation(Graphics, Controls):
         self.total_frames = self.current_config['frames']['total_frames']
         self.fps = self.current_config['fps']
         self.reset_idx = self.current_config['reset_idx']
-        self.loop = self.current_config['loop']
+        self.loops = self.current_config['loops']
+        self.is_animated = self.total_frames != 1
+        self.loop_count = 0
 
         if self.reset_idx:
             self._reset_frame_idx()
-
-        if self.loop:
-            self.config_id_fallback = config_id
         
-        if not is_fallback:
+        if is_fallback:
+            self.config_id_fallback = config_id
+        else:
             self._handle_keyframes()
 
         self._set_image()
     
     def _update_frame(self, dt: float) -> None:
-        if self.total_frames == 1:
-            self._set_image()
+        if not self.is_animated:
+            self._handle_loops()
+            self._handle_fallback()
             return
+
         self._update_frame_idx(dt)
         if self.current_frame_idx != self.pre_frame_idx:
             self.pre_frame_idx = self.int_frame_idx
-            self._handle_fallback()
+            self._handle_loops()
             self._handle_keyframes()
             self._set_image()
+            self._handle_fallback()
+    
+    def _handle_loops(self) -> None:
+        if self.loops <= 0:
+            return 
+        if self.current_frame_idx % self.total_frames == 0:
+            self.loop_count = self.loop_count + 1
     
     def _update_frame_idx(self, dt: float) -> None:
         self.float_frame_idx = (self.float_frame_idx + self.fps * dt) % self.total_frames
         self.int_frame_idx = int(self.float_frame_idx)
         self.current_frame_idx = self.int_frame_idx
     
-    
-    def _handle_fallback(self) -> None:
-        if not self.loop and self.current_frame_idx % self.total_frames == 0:
-            self._switch_config(self.config_id_fallback, is_fallback=True)
-        
     def _handle_keyframes(self) -> None: ...
+
+    def _handle_fallback(self) -> None:
+        if self.loops <= 0:
+            return
+        if self.loop_count == self.loops:
+            self._switch_config(self.config_id_fallback, is_fallback=True)
     
     def _set_image(self) -> None:
         if image := self.frames.get(f'{self.asset_id}-{self.current_frame_idx}'):
