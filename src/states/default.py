@@ -4,7 +4,7 @@ from src.states.parent import State
 from utils.text import Text
 from src.variables import GameVars
 from src.sprites.stock_sprite import StockSprite
-from src.sprites.button import Button
+from src.sprites.parents import Button
 
 
 class DefaultState(State):
