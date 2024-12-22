@@ -9,6 +9,7 @@ class Button(Sprite, Animation):
             self,
             func: callable,
             pos: Vector2,
+            scale: float=1.0,
             is_toggle: bool=True,
             is_disabled: bool=False,
             is_instant: bool=True,
@@ -28,7 +29,8 @@ class Button(Sprite, Animation):
             ) -> None:
         super().__init__()
         self.func = func
-        self.origin_pos = pos
+        self.ORIGIN_POS = pos
+        self.ORIGIN_SCALE = scale
         self.is_toggle = is_toggle
         self.is_disabled = is_disabled
         self.is_instant = is_instant
@@ -63,7 +65,8 @@ class Button(Sprite, Animation):
         self._create_config(config_id, asset_id, fps)
     
     def _overrides(self) -> None:
-        self.pos = self.origin_pos.copy()
+        self.pos = self.ORIGIN_POS.copy()
+        self.scale = self.ORIGIN_SCALE
     
     def mouse_held(self, buttons: tuple[int]) -> None:
         self.is_m1_held = buttons[0]
@@ -75,8 +78,8 @@ class Button(Sprite, Animation):
     def _handle_presses(self, mouse_pos: Vector2) -> None:
         self.is_hovered = self.rect.collidepoint(*mouse_pos)
 
-        self._handle_m1_lock()
         self._handle_m1_release()
+        self._handle_m1_lock()
 
         if self.is_toggle:
             self._handle_toggle_press()
@@ -90,11 +93,13 @@ class Button(Sprite, Animation):
         self.is_m1_released = False
 
     def _handle_m1_lock(self) -> None:
+        if self.is_m1_released:
+            self.is_mouse_pos_locked = False
+            return
+
         if self.is_m1_held and not self.is_mouse_pos_locked:
             self.is_hovered_on_click = self.is_hovered
             self.is_mouse_pos_locked = True
-        elif not self.is_m1_held or not self.is_hovered:
-            self.is_mouse_pos_locked = False
     
     def _handle_m1_release(self) -> None:
         if self.is_m1_held and not self.is_release_pending:

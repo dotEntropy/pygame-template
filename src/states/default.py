@@ -15,7 +15,8 @@ class DefaultState(State):
         self.stock_sprite = StockSprite()
         self.button = Button(
             self.say,
-            GameVars.get_center_pos(), 
+            Vector2(100, 200), 
+            scale=0.25,
             is_toggle=False, 
             released_animation={
                 'asset_id': 'button-release',

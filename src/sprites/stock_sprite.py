@@ -8,16 +8,16 @@ from src.variables import GameVars
 class StockSprite(Sprite, Animation):
     def __init__(self):
         super().__init__()
-        Animation.__init__(self, config_id='test', asset_id='test', fps=2)
+        Animation.__init__(self, config_id='test', asset_id='test', fps=3)
         self._create_config(
             config_id='test_', 
             asset_id='test_', 
-            fps=2,
+            fps=5,
             loops=2
             )
     
     def _overrides(self):
-        self.pos = Vector2(GameVars.get_center_pos().x - 550, GameVars.get_center_pos().y + 150)
+        self.pos = Vector2(100, 100)
         self.scale = 1
     
     def _handle_keyframes(self):
