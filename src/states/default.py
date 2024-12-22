@@ -1,7 +1,7 @@
 import pygame
 from pygame.math import Vector2
 from src.states.parent import State
-from utils.text import Text
+from src.sprites.templates import Text
 from src.sprites.templates import Button
 from src.variables import GameVars
 from src.sprites.stock_sprite import StockSprite
