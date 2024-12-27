@@ -10,8 +10,8 @@ class State:
         GameVars.states[self.alias] = self
         self.SCREEN = pygame.display.get_surface()
         self._init_buttons()
-        self._init_sprites()
         self._init_groups()
+        self._init_sprites()
         load_str = 'reloaded!' if is_reloaded else 'loaded!'
         print(f'{colorama.Fore.GREEN}The state "{self.alias}" is {load_str}')
 

@@ -1,36 +1,46 @@
+from pygame.sprite import Group
 from pygame.sprite import Sprite
 from pygame.math import Vector2
+import colorama
 from src.sprites.parents import Animation
+from utils import tools
 
 
 class Button(Sprite, Animation):
     def __init__(
             self,
-            func: callable,
+            group: Group,
             pos: Vector2,
+            func: callable,
+            func_kwargs: dict={},
             scale: float=1.0,
+            is_held: bool=False,
+            is_released_on_unhovered: bool=True,
             is_toggle: bool=True,
             is_disabled: bool=False,
             is_instant: bool=True,
             is_pressed: bool=False,
             released_animation: dict={
-                'asset_id': 'button-released',
+                'asset_id': 'button-release',
                 'fps': 14
                 },
             hovered_animation: dict={
-                'asset_id': 'button-hovered',
+                'asset_id': 'button-hover',
                 'fps': 14
                 },
             pressed_animation: dict={
-                'asset_id': 'button-pressed',
+                'asset_id': 'button-press',
                 'fps': 14
                 },
             ) -> None:
-        super().__init__()
+        super().__init__(group)
         self.func = func
-        self.ORIGIN_POS = pos
+        self.func_kwargs = func_kwargs
+        self.ORIGIN_POS = pos.copy()
         self.ORIGIN_SCALE = scale
-        self.is_toggle = is_toggle
+        self.is_toggle = False if is_held else is_toggle
+        self.is_held = is_held
+        self.is_released_on_unhovered = is_released_on_unhovered
         self.is_disabled = is_disabled
         self.is_instant = is_instant
         self.is_pressed = is_pressed
@@ -46,6 +56,15 @@ class Button(Sprite, Animation):
         self.is_m1_released = False
         self.is_mouse_pos_locked = False
         self._load_animation_configs()
+    
+    def _check_func_integrity(self) -> None:
+        integrity_conditions = (
+            callable(self.func),
+            isinstance(self.func_kwargs, dict)
+        )
+        if not all(integrity_conditions):
+            print(f'{colorama.Fore.RED}Invalid function')
+            exit()
     
     def _load_animation_configs(self) -> None:
         config_id = 'released'
@@ -71,8 +90,17 @@ class Button(Sprite, Animation):
         self.is_m1_held = buttons[0]
     
     def update(self, *args, **kwargs) -> None:
+        self._pre_update_overrides(**kwargs)
         self._handle_presses(kwargs['mouse_pos'])
         self._update_frame(kwargs['dt'])
+        self._post_update_overrides(**kwargs)
+    
+    def _pre_update_overrides(self, **kwargs) -> None: ...
+    def _post_update_overrides(self, **kwargs) -> None: ...
+    
+    def _update_func_kwargs(self, func_kwargs: dict):
+        if self.func_kwargs != func_kwargs:
+            self.func_kwargs = func_kwargs
     
     def _handle_presses(self, mouse_pos: Vector2) -> None:
         self.is_hovered = self.rect.collidepoint(*mouse_pos)
@@ -87,7 +115,11 @@ class Button(Sprite, Animation):
             self._handle_normal_press()
             self._handle_normal_animation_switch()
 
-        self._handle_activation()
+        if self.is_held:
+            self._handle_held_activation()
+        else:
+            self._handle_activation()
+
         self._handle_pending_activation() 
         self.is_m1_released = False
 
@@ -147,6 +179,9 @@ class Button(Sprite, Animation):
             self.is_hovered_on_click,
             self.is_hovered,
             self.is_m1_held
+        ) if self.is_released_on_unhovered else (
+            self.is_hovered_on_click,
+            self.is_m1_held
         )
         if all(press_conditions):
             self.is_pressed = True
@@ -162,11 +197,134 @@ class Button(Sprite, Animation):
         if all(activate_conditions):
             self._activate()
     
+    def _handle_held_activation(self) -> None:
+        activate_conditions = (
+            self.is_hovered_on_click,
+            self.is_hovered,
+            self.is_pressed,
+        ) if self.is_released_on_unhovered else (
+            self.is_hovered_on_click,
+            self.is_pressed
+        )
+        if all(activate_conditions):
+            self._activate()
+    
     def _activate(self) -> None:
         if self.is_instant:
-            self.func()
+            self.func(**self.func_kwargs)
         else:
             self.is_delayed_activation_pending = True
+
+
+class SliderBase(Sprite, Animation):
+    def __init__(
+            self, 
+            pos: Vector2, 
+            group: Group,
+            scale: float=1.0, 
+            animation: dict={}
+            ) -> None:
+        super().__init__(group)
+        self.ORIGIN_POS = pos.copy()
+        self.ORIGIN_SCALE = scale
+        self.slider_base_animation = animation
+        self._load_animation_configs()
+    
+    def _load_animation_configs(self) -> None:
+        config_id = 'slider-base'
+        asset_id = self.slider_base_animation.get('asset_id', 'slider-base')
+        fps = self.slider_base_animation.get('fps', 0)
+        Animation.__init__(self, config_id, asset_id, fps)
+    
+    def _overrides(self):
+        self.pos = self.ORIGIN_POS.copy()
+        self.scale = self.ORIGIN_SCALE
+
+
+class SliderCTRL(Button):
+    def __init__(
+            self, 
+            pos: Vector2, 
+            group: Group,
+            base: SliderBase,
+            snap_value: float | int,
+            released_animation: dict,
+            hovered_animation: dict,
+            pressed_animation: dict,
+            scale: float=1.0, 
+            ) -> None:
+        Button.__init__(
+            self, 
+            group, 
+            pos, 
+            self._drag_func, 
+            scale, 
+            is_toggle=False, 
+            is_held=True,
+            is_released_on_unhovered=False,
+            released_animation={
+                'asset_id': released_animation.get('asset_id', 'slider-ctrl')
+                },
+            hovered_animation={
+                'asset_id': hovered_animation.get('asset_id', 'slider-ctrl')
+                },
+            pressed_animation={
+                'asset_id': pressed_animation.get('asset_id', 'slider-ctrl-press')
+                }
+            )
+        self.base = base
+        self.MIN_VALUE = 0
+        self.MAX_VALUE = 100
+        self.value = self.MAX_VALUE
+        self.snap_value = snap_value
+    
+    def mouse_held(self, buttons: tuple[int]):
+        self.is_m1_held = buttons[0]
+    
+    def _pre_update_overrides(self, **kwargs):
+        self._update_func_kwargs(kwargs)
+        self.rect.centerx = self.pos.x
+    
+    def _drag_func(self, **kwargs) -> None:
+        mouse_pos = kwargs.get('mouse_pos')
+        base_rect = self.base.rect
+        min_pos = base_rect.left
+        max_pos = base_rect.right
+        raw_pos_x = tools.clamp(mouse_pos.x, min_pos, max_pos)
+        self.value = tools.remap(min_pos, max_pos, raw_pos_x, self.MIN_VALUE, self.MAX_VALUE)
+        self.value = tools.snap(self.value, self.snap_value)
+        self.pos.x = tools.remap(self.MIN_VALUE, self.MAX_VALUE, self.value, min_pos, max_pos)
+
+class Slider():
+    def __init__(
+            self, 
+            group: Group, 
+            pos: Vector2, 
+            snap_value: int | float=0,
+            base_animation: dict={},
+            ctrl_released_animation: dict={},
+            ctrl_hovered_animation: dict={},
+            ctrl_pressed_animation: dict={},
+            scale: float=1.0
+            ) -> None:
+
+        self.base = SliderBase(
+            pos, 
+            group, 
+            scale=scale, 
+            animation=base_animation
+            )
+
+        self.ctrl = SliderCTRL(
+            Vector2(self.base.rect.right, self.base.pos.y + self.base.rect.height * scale),
+            group, 
+            self.base,
+            snap_value,
+            ctrl_released_animation, 
+            ctrl_hovered_animation,
+            ctrl_pressed_animation,
+            scale=scale, 
+            )
 
 
 import pygame

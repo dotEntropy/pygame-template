@@ -1,8 +1,7 @@
 import pygame
 from pygame.math import Vector2
 from src.states.parent import State
-from src.sprites.templates import Text
-from src.sprites.templates import Button
+from src.sprites.templates import Button, Slider, Text
 from src.variables import GameVars
 from src.sprites.stock_sprite import StockSprite
 
@@ -11,12 +10,15 @@ class DefaultState(State):
     def __init__(self) -> None:
         super().__init__('default')
 
+    def _init_groups(self):
+        self.group = pygame.sprite.Group()
+
     def _init_sprites(self):
         self.stock_sprite = StockSprite()
         self.button = Button(
-            self.say,
+            self.group,
             Vector2(100, 200), 
-            scale=0.25,
+            self.say,
             is_toggle=False, 
             released_animation={
                 'asset_id': 'button-release',
@@ -28,9 +30,11 @@ class DefaultState(State):
                 'asset_id': 'button-press',
                 },
             )
-
-    def _init_groups(self):
-        self.group = pygame.sprite.Group()
+        self.slider = Slider(
+            self.group, 
+            Vector2(220, 300),
+            snap_value=5
+        )
         self.group.add(self.stock_sprite, self.button)
     
     def say(self) -> None:
