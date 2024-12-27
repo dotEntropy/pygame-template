@@ -123,5 +123,5 @@ def remap(a1: float, b1: float, v: float, a2: float, b2: float, is_clamped: bool
 
 
 def snap(value: float | int, multiple: float | int) -> float | int:
-    result = multiple * round(value / multiple)
+    result = multiple * round(value / multiple) if multiple else value
     return result
