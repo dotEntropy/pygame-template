@@ -244,6 +244,7 @@ class SliderBase(Sprite, Animation):
 class SliderCTRL(Button):
     def __init__(
             self, 
+            value_delta_func: callable,
             pos: Vector2, 
             group: Group,
             base: SliderBase,
@@ -272,10 +273,12 @@ class SliderCTRL(Button):
                 'asset_id': pressed_animation.get('asset_id', 'slider-ctrl-press')
                 }
             )
+        self.value_delta_func = value_delta_func
         self.base = base
         self.MIN_VALUE = 0
         self.MAX_VALUE = 100
         self.value = self.MAX_VALUE
+        self.pre_value = self.value
         self.snap_value = snap_value
     
     def mouse_held(self, buttons: tuple[int]):
@@ -293,12 +296,18 @@ class SliderCTRL(Button):
         raw_pos_x = tools.clamp(mouse_pos.x, min_pos, max_pos)
         self.value = tools.remap(min_pos, max_pos, raw_pos_x, self.MIN_VALUE, self.MAX_VALUE)
         self.value = tools.snap(self.value, self.snap_value)
-        self.pos.x = tools.remap(self.MIN_VALUE, self.MAX_VALUE, self.value, min_pos, max_pos)
+
+        if self.value != self.pre_value:
+            self.pos.x = tools.remap(self.MIN_VALUE, self.MAX_VALUE, self.value, min_pos, max_pos)
+            self.value_delta_func(**{'value': self.value})
+
+        self.pre_value = self.value
 
 class Slider():
     def __init__(
             self, 
             group: Group, 
+            value_delta_func: callable,
             pos: Vector2, 
             snap_value: int | float=0,
             base_animation: dict={},
@@ -316,6 +325,7 @@ class Slider():
             )
 
         self.ctrl = SliderCTRL(
+            value_delta_func,
             Vector2(self.base.rect.right, self.base.pos.y + self.base.rect.height * scale),
             group, 
             self.base,

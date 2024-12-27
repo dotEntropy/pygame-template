@@ -32,13 +32,15 @@ class DefaultState(State):
             )
         self.slider = Slider(
             self.group, 
+            self.say,
             Vector2(220, 300),
-            snap_value=5
+            snap_value=1
         )
         self.group.add(self.stock_sprite, self.button)
     
-    def say(self) -> None:
-        print(pygame.mouse.get_pos())
+    def say(self, **kwargs) -> None:
+        value = kwargs.get('value')
+        self.button.update_scale(value / 100)
     
     def update(self, dt: float) -> None:
         mouse_pos = Vector2(pygame.mouse.get_pos())

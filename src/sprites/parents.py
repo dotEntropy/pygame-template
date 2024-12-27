@@ -82,7 +82,7 @@ class Animation(Graphics, Controls):
         else:
             self._reset_frame_idx()
 
-        self._set_image()
+        self._update_image()
         # print(f'Switched to {config_id} config; [animated: {self.is_animated}, fallback: {is_fallback}]')
     
     def _handle_animation_config(self) -> None:
@@ -102,7 +102,7 @@ class Animation(Graphics, Controls):
             self.pre_frame_idx = self.int_frame_idx
             self._handle_loops()
             self._handle_keyframes()
-            self._set_image()
+            self._update_image()
             self._handle_fallback()
 
     def _update_frame_idx(self, dt: float) -> None:
@@ -124,7 +124,11 @@ class Animation(Graphics, Controls):
         if self.loop_count == self.loops:
             self._switch_config(self.config_id_fallback, is_fallback=True)
     
-    def _set_image(self) -> None:
+    def update_scale(self, scale: float) -> None:
+        self.scale = scale
+        self._update_image()
+    
+    def _update_image(self) -> None:
         if image := self.frames.get(f'{self.asset_id}-{self.current_frame_idx}'):
             self._update_sprite(image)
     
