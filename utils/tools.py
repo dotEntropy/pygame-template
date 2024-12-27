@@ -100,19 +100,28 @@ def get_offset(radian: float, offset: float) -> float:
     return radian
 
 
+def clamp(value: float| int, min_value: float | int, max_value: float | int) -> int | float:
+    result = min(max(value, min_value), max_value)
+    return result
+
+
 def lerp(a: float, b: float, t: float) -> float:
     result = (1 - t) * a + t * b
     return result
 
 
 def invlerp(a: float, b: float, v: float) -> float:
-    if b == v: return 1.0
-    result = (v - a) / (b - a)
+    result = (v - a) / (b - a) if b != v else 1.0
     return result
 
 
-def remap(a1: float, b1: float, v: float, a2: float, b2: float, clamp: bool=True) -> float:
+def remap(a1: float, b1: float, v: float, a2: float, b2: float, is_clamped: bool=True) -> float:
     lerp_val = invlerp(a1, b1, v)
-    lerp_val = max(min(lerp_val, 1), 0) if clamp else lerp_val
+    lerp_val = clamp(lerp_val, 0, 1) if is_clamped else lerp_val
     result = lerp(a2, b2, lerp_val)
+    return result
+
+
+def snap(value: float | int, multiple: float | int) -> float | int:
+    result = multiple * round(value / multiple)
     return result
